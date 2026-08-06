@@ -12,7 +12,7 @@ from typing import TYPE_CHECKING, Any, TypeVar
 
 from typing_extensions import Self
 
-from amazon_creatorsapi.core.constants import DEFAULT_THROTTLING
+from amazon_creatorsapi.core.constants import DEFAULT_THROTTLING, DEFAULT_TIMEOUT
 from amazon_creatorsapi.core.error_handling import handle_api_error
 from amazon_creatorsapi.core.parsers import get_asin, get_items_ids
 from amazon_creatorsapi.core.resources import get_all_resources
@@ -21,7 +21,7 @@ from amazon_creatorsapi.errors import ItemsNotFoundError
 
 try:
     from .auth import VERSION_ENDPOINTS, AsyncOAuth2TokenManager
-    from .client import DEFAULT_TIMEOUT, AsyncHttpClient
+    from .client import AsyncHttpClient
 except ImportError as exc:  # pragma: no cover
     msg = (
         "httpx is required for async support. "

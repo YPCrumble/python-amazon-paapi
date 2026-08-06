@@ -12,6 +12,8 @@ from typing import TYPE_CHECKING, Any
 
 from typing_extensions import Self
 
+from amazon_creatorsapi.core.constants import DEFAULT_TIMEOUT
+
 if TYPE_CHECKING:
     from types import TracebackType
 
@@ -26,7 +28,6 @@ except ImportError as exc:  # pragma: no cover
 
 
 DEFAULT_HOST = "https://creatorsapi.amazon"
-DEFAULT_TIMEOUT = 30.0
 VERSION = version("python-amazon-paapi")
 USER_AGENT = f"python-amazon-paapi/{VERSION} (async)"
 

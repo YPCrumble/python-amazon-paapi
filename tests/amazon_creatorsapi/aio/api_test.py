@@ -7,7 +7,7 @@ from amazon_creatorsapi.aio import (
     AsyncAmazonCreatorsApi,
 )
 from amazon_creatorsapi.aio.api import API_HOST
-from amazon_creatorsapi.aio.client import DEFAULT_TIMEOUT
+from amazon_creatorsapi.core.constants import DEFAULT_TIMEOUT
 from amazon_creatorsapi.errors import (
     AssociateValidationError,
     InvalidArgumentError,

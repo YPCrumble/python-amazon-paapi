@@ -121,7 +121,7 @@ amazon = AmazonCreatorsApi(ID, SECRET, VERSION, TAG, COUNTRY, throttling=0)  # N
 
 ### Timeout
 
-Timeout value represents the number of seconds to wait for a response before failing. The sync API waits indefinitely by default, while the async API waits 30 seconds. Use `None` to wait indefinitely.
+Timeout value represents the number of seconds to wait for a response before failing, being the default value 30 seconds. Use `None` to wait indefinitely.
 
 ```python
 amazon = AmazonCreatorsApi(ID, SECRET, VERSION, TAG, COUNTRY, timeout=10)  # Fails after 10 seconds
