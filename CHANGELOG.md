@@ -9,8 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- `timeout` parameter in `AmazonCreatorsApi` and `AsyncAmazonCreatorsApi` to set the request timeout
-- Default request timeout of 30 seconds for `amazon_creatorsapi`, which previously made requests without any timeout
+- `timeout` parameter in `AmazonCreatorsApi` and `AsyncAmazonCreatorsApi` to set the request timeout in seconds
+- `AmazonCreatorsApi` requests can now time out instead of waiting indefinitely, by passing `timeout`
 
 ## [6.3.0] - 2026-05-15
 

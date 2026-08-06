@@ -9,7 +9,6 @@ from unittest import mock
 from unittest.mock import MagicMock
 
 from amazon_creatorsapi import AmazonCreatorsApi
-from amazon_creatorsapi.core.constants import DEFAULT_TIMEOUT
 from amazon_creatorsapi.errors import (
     AssociateValidationError,
     InvalidArgumentError,
@@ -833,12 +832,12 @@ class TestAmazonCreatorsApi(unittest.TestCase):
 
     @mock.patch("amazon_creatorsapi.api.DefaultApi")
     @mock.patch("amazon_creatorsapi.api.ApiClient")
-    def test_get_items_uses_default_timeout(
+    def test_get_items_without_timeout_by_default(
         self,
         _mock_client_class: MagicMock,
         mock_api_class: MagicMock,
     ) -> None:
-        """Test get_items forwards the default timeout to the SDK."""
+        """Test get_items sends no timeout to the SDK unless one is given."""
         mock_api = MagicMock()
         mock_api_class.return_value = mock_api
         mock_response = MagicMock()
@@ -855,10 +854,37 @@ class TestAmazonCreatorsApi(unittest.TestCase):
         )
         api.get_items(["B0DLFMFBJW"])
 
-        self.assertEqual(api.timeout, DEFAULT_TIMEOUT)
+        self.assertIsNone(api.timeout)
+        self.assertIsNone(mock_api.get_items.call_args.kwargs["_request_timeout"])
+
+    @mock.patch("amazon_creatorsapi.api.DefaultApi")
+    @mock.patch("amazon_creatorsapi.api.ApiClient")
+    def test_get_items_forwards_custom_timeout(
+        self,
+        _mock_client_class: MagicMock,
+        mock_api_class: MagicMock,
+    ) -> None:
+        """Test get_items forwards a custom timeout to the SDK."""
+        mock_api = MagicMock()
+        mock_api_class.return_value = mock_api
+        mock_response = MagicMock()
+        mock_response.items_result.items = [MagicMock()]
+        mock_api.get_items.return_value = mock_response
+
+        api = AmazonCreatorsApi(
+            credential_id=self.credential_id,
+            credential_secret=self.credential_secret,
+            version=self.version,
+            tag=self.tag,
+            country=self.country,
+            throttling=0,
+            timeout=30.0,
+        )
+        api.get_items(["B0DLFMFBJW"])
+
         self.assertEqual(
             mock_api.get_items.call_args.kwargs["_request_timeout"],
-            DEFAULT_TIMEOUT,
+            30.0,
         )
 
     @mock.patch("amazon_creatorsapi.api.DefaultApi")
@@ -893,12 +919,12 @@ class TestAmazonCreatorsApi(unittest.TestCase):
 
     @mock.patch("amazon_creatorsapi.api.DefaultApi")
     @mock.patch("amazon_creatorsapi.api.ApiClient")
-    def test_get_variations_forwards_timeout_tuple(
+    def test_get_variations_forwards_custom_timeout(
         self,
         _mock_client_class: MagicMock,
         mock_api_class: MagicMock,
     ) -> None:
-        """Test get_variations forwards a (connect, read) timeout to the SDK."""
+        """Test get_variations forwards a custom timeout to the SDK."""
         mock_api = MagicMock()
         mock_api_class.return_value = mock_api
         mock_response = MagicMock()
@@ -912,13 +938,13 @@ class TestAmazonCreatorsApi(unittest.TestCase):
             tag=self.tag,
             country=self.country,
             throttling=0,
-            timeout=(3.0, 10.0),
+            timeout=3.5,
         )
         api.get_variations("B0DLFMFBJW")
 
         self.assertEqual(
             mock_api.get_variations.call_args.kwargs["_request_timeout"],
-            (3.0, 10.0),
+            3.5,
         )
 
     @mock.patch("amazon_creatorsapi.api.DefaultApi")

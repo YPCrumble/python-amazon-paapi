@@ -12,8 +12,6 @@ from typing import TYPE_CHECKING, Any
 
 from typing_extensions import Self
 
-from amazon_creatorsapi.core.constants import DEFAULT_TIMEOUT
-
 if TYPE_CHECKING:
     from types import TracebackType
 
@@ -28,28 +26,9 @@ except ImportError as exc:  # pragma: no cover
 
 
 DEFAULT_HOST = "https://creatorsapi.amazon"
+DEFAULT_TIMEOUT = 30.0
 VERSION = version("python-amazon-paapi")
 USER_AGENT = f"python-amazon-paapi/{VERSION} (async)"
-
-
-def _build_timeout(timeout: float | tuple[float, float]) -> float | httpx.Timeout:
-    """Return a timeout that httpx understands.
-
-    A (connect, read) pair is mapped to an httpx timeout where the read value
-    also applies to the write and pool phases, so no phase is left unbounded.
-
-    Args:
-        timeout: Timeout in seconds, either a single value or a
-            (connect, read) pair.
-
-    Returns:
-        The timeout value to give to httpx.
-
-    """
-    if isinstance(timeout, tuple):
-        connect_timeout, read_timeout = timeout
-        return httpx.Timeout(read_timeout, connect=connect_timeout)
-    return timeout
 
 
 @dataclass
@@ -85,19 +64,19 @@ class AsyncHttpClient:
 
     Args:
         host: Base URL for API requests. Defaults to Amazon Creators API.
-        timeout: Request timeout in seconds. Accepts a single value for the whole
-            request or a (connect, read) pair. Defaults to 30.
+        timeout: Request timeout in seconds, or None to wait indefinitely.
+            Defaults to 30.
 
     """
 
     def __init__(
         self,
         host: str = DEFAULT_HOST,
-        timeout: float | tuple[float, float] = DEFAULT_TIMEOUT,
+        timeout: float | None = DEFAULT_TIMEOUT,
     ) -> None:
         """Initialize the async HTTP client."""
         self._host = host
-        self._timeout = _build_timeout(timeout)
+        self._timeout = timeout
         self._client: httpx.AsyncClient | None = None
         self._owns_client = False
 

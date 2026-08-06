@@ -12,7 +12,7 @@ from typing import TYPE_CHECKING, Any, TypeVar
 
 from typing_extensions import Self
 
-from amazon_creatorsapi.core.constants import DEFAULT_THROTTLING, DEFAULT_TIMEOUT
+from amazon_creatorsapi.core.constants import DEFAULT_THROTTLING
 from amazon_creatorsapi.core.error_handling import handle_api_error
 from amazon_creatorsapi.core.parsers import get_asin, get_items_ids
 from amazon_creatorsapi.core.resources import get_all_resources
@@ -21,7 +21,7 @@ from amazon_creatorsapi.errors import ItemsNotFoundError
 
 try:
     from .auth import VERSION_ENDPOINTS, AsyncOAuth2TokenManager
-    from .client import AsyncHttpClient
+    from .client import DEFAULT_TIMEOUT, AsyncHttpClient
 except ImportError as exc:  # pragma: no cover
     msg = (
         "httpx is required for async support. "
@@ -104,8 +104,8 @@ class AsyncAmazonCreatorsApi:
         country: Country code (e.g., "ES", "US"). Used to determine marketplace.
         marketplace: Marketplace URL (e.g., "www.amazon.es"). Overrides country.
         throttling: Wait time in seconds between API calls. Defaults to 1 second.
-        timeout: Request timeout in seconds. Accepts a single value for the whole
-            request or a (connect, read) pair. Defaults to 30 seconds.
+        timeout: Request timeout in seconds, or None to wait indefinitely.
+            Defaults to 30 seconds.
 
     Raises:
         InvalidArgumentError: If neither country nor marketplace is provided.
@@ -123,7 +123,7 @@ class AsyncAmazonCreatorsApi:
         country: CountryCode | None = None,
         marketplace: str | None = None,
         throttling: float = DEFAULT_THROTTLING,
-        timeout: float | tuple[float, float] = DEFAULT_TIMEOUT,
+        timeout: float | None = DEFAULT_TIMEOUT,
     ) -> None:
         """Initialize the async Amazon Creators API client."""
         # Validate version early to fail fast (before token manager initialization)

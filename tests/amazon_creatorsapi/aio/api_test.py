@@ -7,7 +7,7 @@ from amazon_creatorsapi.aio import (
     AsyncAmazonCreatorsApi,
 )
 from amazon_creatorsapi.aio.api import API_HOST
-from amazon_creatorsapi.core.constants import DEFAULT_TIMEOUT
+from amazon_creatorsapi.aio.client import DEFAULT_TIMEOUT
 from amazon_creatorsapi.errors import (
     AssociateValidationError,
     InvalidArgumentError,
@@ -1457,12 +1457,12 @@ class TestAsyncAmazonCreatorsApiTimeout(unittest.IsolatedAsyncioTestCase):
 
     @patch("amazon_creatorsapi.aio.api.AsyncOAuth2TokenManager")
     @patch("amazon_creatorsapi.aio.api.AsyncHttpClient")
-    async def test_client_receives_timeout_tuple(
+    async def test_client_receives_disabled_timeout(
         self,
         mock_http_client_class: MagicMock,
         mock_token_manager: MagicMock,
     ) -> None:
-        """Test a (connect, read) timeout is passed to the HTTP client."""
+        """Test a None timeout is passed to the HTTP client to disable it."""
         mock_http_client_class.return_value = AsyncMock()
 
         async with AsyncAmazonCreatorsApi(
@@ -1471,14 +1471,11 @@ class TestAsyncAmazonCreatorsApiTimeout(unittest.IsolatedAsyncioTestCase):
             version="2.2",
             tag="test-tag",
             country="ES",
-            timeout=(3.0, 10.0),
+            timeout=None,
         ):
             pass
 
-        mock_http_client_class.assert_called_once_with(
-            host=API_HOST,
-            timeout=(3.0, 10.0),
-        )
+        mock_http_client_class.assert_called_once_with(host=API_HOST, timeout=None)
 
 
 if __name__ == "__main__":

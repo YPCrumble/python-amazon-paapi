@@ -8,7 +8,7 @@ from __future__ import annotations
 import time
 from typing import TYPE_CHECKING, NoReturn
 
-from amazon_creatorsapi.core.constants import DEFAULT_THROTTLING, DEFAULT_TIMEOUT
+from amazon_creatorsapi.core.constants import DEFAULT_THROTTLING
 from amazon_creatorsapi.core.error_handling import handle_api_error
 from amazon_creatorsapi.core.parsers import get_asin, get_items_ids
 from amazon_creatorsapi.core.resources import get_all_resources
@@ -58,8 +58,8 @@ class AmazonCreatorsApi:
         country: Country code (e.g., "ES", "US"). Used to determine marketplace.
         marketplace: Marketplace URL (e.g., "www.amazon.es"). Overrides country.
         throttling: Wait time in seconds between API calls. Defaults to 1 second.
-        timeout: Request timeout in seconds. Accepts a single value for the whole
-            request or a (connect, read) pair. Defaults to 30 seconds.
+        timeout: Request timeout in seconds. Defaults to None, which waits
+            indefinitely for a response.
 
     Raises:
         InvalidArgumentError: If neither country nor marketplace is provided.
@@ -85,7 +85,7 @@ class AmazonCreatorsApi:
         country: CountryCode | None = None,
         marketplace: str | None = None,
         throttling: float = DEFAULT_THROTTLING,
-        timeout: float | tuple[float, float] = DEFAULT_TIMEOUT,
+        timeout: float | None = None,
     ) -> None:
         """Initialize the Amazon Creators API client."""
         self._credential_id = credential_id

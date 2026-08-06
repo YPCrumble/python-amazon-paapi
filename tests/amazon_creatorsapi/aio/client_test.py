@@ -5,8 +5,6 @@ import sys
 import unittest
 from unittest.mock import AsyncMock, MagicMock, patch
 
-import httpx
-
 from amazon_creatorsapi.aio.client import (
     DEFAULT_HOST,
     DEFAULT_TIMEOUT,
@@ -34,13 +32,10 @@ class TestAsyncHttpClient(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(client._host, host)
         self.assertEqual(client._timeout, timeout)
 
-    async def test_init_timeout_tuple(self) -> None:
-        """Test a (connect, read) timeout is mapped to an httpx timeout."""
-        client = AsyncHttpClient(timeout=(3.0, 10.0))
-        self.assertEqual(
-            client._timeout,
-            httpx.Timeout(10.0, connect=3.0),
-        )
+    async def test_init_timeout_disabled(self) -> None:
+        """Test the timeout can be disabled with None."""
+        client = AsyncHttpClient(timeout=None)
+        self.assertIsNone(client._timeout)
 
     @patch("amazon_creatorsapi.aio.client.httpx.AsyncClient")
     async def test_context_manager(self, mock_client_cls: MagicMock) -> None:
