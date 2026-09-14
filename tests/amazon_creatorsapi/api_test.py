@@ -1575,20 +1575,16 @@ class TestAmazonCreatorsApiItems(unittest.TestCase):
         self.assertEqual(api.token_timeout, 12.0)
 
     @mock.patch("amazon_creatorsapi.api.ApiClient")
-    def test_token_timeout_of_none_waits_indefinitely(
+    def test_token_timeout_follows_a_timeout_of_none(
         self,
         mock_client_class: MagicMock,
     ) -> None:
-        """Test that the token request can be left unbounded on purpose.
-
-        None is a timeout in its own right, so it has to stay apart from the
-        token timeout not being given at all.
-        """
+        """Test that an unbounded client leaves the token request unbounded."""
         mock_client_class.return_value = MagicMock()
 
-        api = self.build_api_with_timeouts(timeout=12.0, token_timeout=None)
+        api = self.build_api_with_timeouts(timeout=None)
 
-        self.assertEqual(api.timeout, 12.0)
+        self.assertIsNone(api.timeout)
         self.assertIsNone(api.token_timeout)
 
     @mock.patch("amazon_creatorsapi.api.ApiClient")

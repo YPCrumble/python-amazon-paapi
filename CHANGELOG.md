@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - `timeout` in `AmazonCreatorsApi` and `AsyncAmazonCreatorsApi` accepts a pair of `(connect, read)` seconds, bounding each leg of a request on its own, so a host resolving to several addresses cannot spend a read-sized timeout on every one of them
-- `token_timeout` parameter in `AmazonCreatorsApi` and `AsyncAmazonCreatorsApi` to bound the OAuth2 token request apart from the API request, as it is sent to a different host. It follows `timeout` when it is not given, and `None` leaves it unbounded
+- `token_timeout` parameter in `AmazonCreatorsApi` and `AsyncAmazonCreatorsApi` to bound the OAuth2 token request apart from the API request, as it is sent to a different host. It follows `timeout` when it is not given
 
 ## [7.0.0] - 2026-09-04
 

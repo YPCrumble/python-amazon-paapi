@@ -18,7 +18,7 @@ from amazon_creatorsapi.core.constants import DEFAULT_TIMEOUT
 if TYPE_CHECKING:
     from types import TracebackType
 
-    from amazon_creatorsapi.core.timeouts import TimeoutValue
+    from amazon_creatorsapi.core.constants import TimeoutValue
 
 try:
     import httpx

@@ -14,7 +14,7 @@ from amazon_creatorsapi.errors import AuthenticationError
 from creatorsapi_python_sdk.auth.oauth2_token_manager import OAuth2TokenManager
 
 if TYPE_CHECKING:
-    from amazon_creatorsapi.core.timeouts import TimeoutValue
+    from amazon_creatorsapi.core.constants import TimeoutValue
     from creatorsapi_python_sdk.auth.oauth2_config import OAuth2Config
 
 

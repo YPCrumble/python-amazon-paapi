@@ -31,7 +31,6 @@ from amazon_creatorsapi.core.requests import get_request_body
 from amazon_creatorsapi.core.resources import get_all_resources
 from amazon_creatorsapi.core.results import ResultList
 from amazon_creatorsapi.core.retry import DEFAULT_RETRIES, get_retry_delay, is_retryable
-from amazon_creatorsapi.core.timeouts import UNSET, TimeoutValue, UnsetType
 from amazon_creatorsapi.core.validation import (
     build_request,
     validate_and_get_marketplace,
@@ -88,6 +87,7 @@ from creatorsapi_python_sdk.models.search_items_resource import SearchItemsResou
 if TYPE_CHECKING:
     from types import TracebackType
 
+    from amazon_creatorsapi.core.constants import TimeoutValue
     from amazon_creatorsapi.core.marketplaces import CountryCode
     from creatorsapi_python_sdk.models.availability import Availability
     from creatorsapi_python_sdk.models.condition import Condition
@@ -180,7 +180,7 @@ class AsyncAmazonCreatorsApi:
         token_timeout: Timeout for the OAuth2 token request, in the same
             shapes as timeout. The token is requested from a different host,
             so it can be bounded apart from the API request. Follows timeout
-            when it is not given, and None waits indefinitely.
+            when it is not given.
 
     Raises:
         InvalidArgumentError: If neither country nor marketplace is provided,
@@ -206,7 +206,7 @@ class AsyncAmazonCreatorsApi:
         retries: int = DEFAULT_RETRIES,
         host: str = DEFAULT_HOST,
         auth_endpoint: str | None = None,
-        token_timeout: TimeoutValue | None | UnsetType = UNSET,
+        token_timeout: TimeoutValue | None = None,
     ) -> None:
         """Initialize the async Amazon Creators API client."""
         # Resolve the endpoint early to fail fast on an unsupported version,
@@ -222,9 +222,7 @@ class AsyncAmazonCreatorsApi:
         self.throttling = validate_throttling(throttling)
         self.timeout = validate_timeout(timeout)
         self.token_timeout = (
-            self.timeout
-            if isinstance(token_timeout, UnsetType)
-            else validate_timeout(token_timeout)
+            self.timeout if token_timeout is None else validate_timeout(token_timeout)
         )
         self.retries = validate_retries(retries)
         self._last_query_time = time.monotonic() - self.throttling

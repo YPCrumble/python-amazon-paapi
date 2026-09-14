@@ -10,8 +10,8 @@ from amazon_creatorsapi.core.marketplaces import MARKETPLACES
 from amazon_creatorsapi.errors import InvalidArgumentError
 
 if TYPE_CHECKING:
+    from amazon_creatorsapi.core.constants import TimeoutValue
     from amazon_creatorsapi.core.marketplaces import CountryCode
-    from amazon_creatorsapi.core.timeouts import TimeoutValue
 
 RequestT = TypeVar("RequestT", bound=BaseModel)
 

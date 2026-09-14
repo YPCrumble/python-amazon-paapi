@@ -25,7 +25,7 @@ from amazon_creatorsapi.core.oauth import (
 from amazon_creatorsapi.errors import AuthenticationError
 
 if TYPE_CHECKING:
-    from amazon_creatorsapi.core.timeouts import TimeoutValue
+    from amazon_creatorsapi.core.constants import TimeoutValue
 
 try:
     import httpx
