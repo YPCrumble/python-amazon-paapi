@@ -11,6 +11,7 @@ from amazon_creatorsapi.errors import InvalidArgumentError
 
 if TYPE_CHECKING:
     from amazon_creatorsapi.core.marketplaces import CountryCode
+    from amazon_creatorsapi.core.timeouts import TimeoutValue
 
 RequestT = TypeVar("RequestT", bound=BaseModel)
 
@@ -44,28 +45,81 @@ def validate_and_get_marketplace(
     raise InvalidArgumentError(msg)
 
 
-def validate_timeout(timeout: float | None) -> float | None:
+def validate_timeout(timeout: TimeoutValue | None) -> TimeoutValue | None:
     """Validate the request timeout value.
 
     Args:
-        timeout: Request timeout in seconds, or None to wait indefinitely.
+        timeout: Request timeout in seconds, a pair of ``(connect, read)``
+            seconds bounding each leg on its own, or None to wait
+            indefinitely.
 
     Returns:
-        The timeout as a float, or None when disabled.
+        The timeout as a float, as a pair of floats, or None when disabled.
 
     Raises:
-        InvalidArgumentError: If the timeout is not greater than zero.
+        InvalidArgumentError: If the timeout is not greater than zero, or if
+            it is a pair that does not hold exactly two of them.
 
     """
     if timeout is None:
         return None
+    if isinstance(timeout, tuple):
+        return _validate_timeout_pair(timeout)
+    return _validate_timeout_seconds(timeout, "Timeout")
+
+
+def _validate_timeout_pair(timeout: tuple[float, ...]) -> tuple[float, float]:
+    """Validate a pair of connect and read timeouts.
+
+    Args:
+        timeout: Pair of ``(connect, read)`` seconds.
+
+    Returns:
+        The pair as floats.
+
+    Raises:
+        InvalidArgumentError: If the pair does not hold exactly two values,
+            or if either of them is not greater than zero.
+
+    """
+    expected_values = 2
+    if len(timeout) != expected_values:
+        msg = (
+            "Timeout must be a pair of (connect, read) seconds when it is a "
+            f"tuple: {timeout!r}"
+        )
+        raise InvalidArgumentError(msg)
+    connect, read = timeout
+    return (
+        _validate_timeout_seconds(connect, "Connect timeout"),
+        _validate_timeout_seconds(read, "Read timeout"),
+    )
+
+
+def _validate_timeout_seconds(timeout: float, name: str) -> float:
+    """Validate a number of seconds used as a timeout.
+
+    Args:
+        timeout: Timeout in seconds.
+        name: Name of the value, used in the message of the error.
+
+    Returns:
+        The timeout as a float.
+
+    Raises:
+        InvalidArgumentError: If the value is not a number greater than zero.
+
+    """
     try:
         value = float(timeout)
     except (TypeError, ValueError) as error:
-        msg = f"Timeout must be a number of seconds, or None: {timeout!r}"
+        msg = (
+            f"{name} must be a number of seconds, a pair of (connect, read) "
+            f"seconds, or None: {timeout!r}"
+        )
         raise InvalidArgumentError(msg) from error
     if value <= 0:
-        msg = "Timeout must be greater than zero, or None to wait indefinitely"
+        msg = f"{name} must be greater than zero, or None to wait indefinitely"
         raise InvalidArgumentError(msg)
     return value
 

@@ -66,6 +66,38 @@ class TestValidateTimeout(unittest.TestCase):
         with self.assertRaises(InvalidArgumentError):
             validate_timeout("slow")  # type: ignore[arg-type]
 
+    def test_returns_a_pair_of_floats(self) -> None:
+        """Test that a pair of connect and read timeouts is returned."""
+        self.assertEqual(validate_timeout((1, 5)), (1.0, 5.0))
+
+    def test_pair_of_one_value_is_rejected(self) -> None:
+        """Test that a tuple holding a single value is rejected."""
+        with self.assertRaises(InvalidArgumentError) as context:
+            validate_timeout((5,))  # type: ignore[arg-type]
+        self.assertIn("pair of (connect, read)", str(context.exception))
+
+    def test_pair_of_three_values_is_rejected(self) -> None:
+        """Test that a tuple holding more than two values is rejected."""
+        with self.assertRaises(InvalidArgumentError):
+            validate_timeout((1, 5, 10))  # type: ignore[arg-type]
+
+    def test_connect_of_zero_is_rejected(self) -> None:
+        """Test that a connect timeout of zero is rejected."""
+        with self.assertRaises(InvalidArgumentError) as context:
+            validate_timeout((0, 5))
+        self.assertIn("Connect timeout", str(context.exception))
+
+    def test_read_of_zero_is_rejected(self) -> None:
+        """Test that a read timeout of zero is rejected."""
+        with self.assertRaises(InvalidArgumentError) as context:
+            validate_timeout((1, 0))
+        self.assertIn("Read timeout", str(context.exception))
+
+    def test_pair_that_is_not_a_number_is_rejected(self) -> None:
+        """Test that a pair holding something else is rejected."""
+        with self.assertRaises(InvalidArgumentError):
+            validate_timeout((1, "slow"))  # type: ignore[arg-type]
+
 
 class TestValidateRetries(unittest.TestCase):
     """Tests for validate_retries function."""

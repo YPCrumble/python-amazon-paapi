@@ -1533,6 +1533,86 @@ class TestAmazonCreatorsApiItems(unittest.TestCase):
         self.assertEqual(token_manager._timeout, 12.0)
         self.assertEqual(api.timeout, 12.0)
 
+    @mock.patch("amazon_creatorsapi.api.ApiClient")
+    def test_timeout_accepts_a_pair(self, mock_client_class: MagicMock) -> None:
+        """Test that a pair bounds the connect and the read leg on its own."""
+        mock_client = MagicMock()
+        mock_client_class.return_value = mock_client
+
+        api = self.build_api_with_timeouts(timeout=(1.0, 12.0))
+
+        self.assertEqual(api.timeout, (1.0, 12.0))
+        self.assertEqual(mock_client._token_manager._timeout, (1.0, 12.0))
+
+    @mock.patch("amazon_creatorsapi.api.ApiClient")
+    def test_token_timeout_bounds_the_token_request(
+        self,
+        mock_client_class: MagicMock,
+    ) -> None:
+        """Test that the token request can be bounded on its own."""
+        mock_client = MagicMock()
+        mock_client_class.return_value = mock_client
+
+        api = self.build_api_with_timeouts(
+            timeout=(1.0, 12.0),
+            token_timeout=(0.5, 2.0),
+        )
+
+        self.assertEqual(api.timeout, (1.0, 12.0))
+        self.assertEqual(api.token_timeout, (0.5, 2.0))
+        self.assertEqual(mock_client._token_manager._timeout, (0.5, 2.0))
+
+    @mock.patch("amazon_creatorsapi.api.ApiClient")
+    def test_token_timeout_follows_the_timeout_by_default(
+        self,
+        mock_client_class: MagicMock,
+    ) -> None:
+        """Test that the token request follows the request timeout."""
+        mock_client_class.return_value = MagicMock()
+
+        api = self.build_api_with_timeouts(timeout=12.0)
+
+        self.assertEqual(api.token_timeout, 12.0)
+
+    @mock.patch("amazon_creatorsapi.api.ApiClient")
+    def test_token_timeout_of_none_waits_indefinitely(
+        self,
+        mock_client_class: MagicMock,
+    ) -> None:
+        """Test that the token request can be left unbounded on purpose.
+
+        None is a timeout in its own right, so it has to stay apart from the
+        token timeout not being given at all.
+        """
+        mock_client_class.return_value = MagicMock()
+
+        api = self.build_api_with_timeouts(timeout=12.0, token_timeout=None)
+
+        self.assertEqual(api.timeout, 12.0)
+        self.assertIsNone(api.token_timeout)
+
+    @mock.patch("amazon_creatorsapi.api.ApiClient")
+    def test_invalid_token_timeout_raises_library_error(
+        self,
+        mock_client_class: MagicMock,
+    ) -> None:
+        """Test that the token timeout is validated like the timeout."""
+        mock_client_class.return_value = MagicMock()
+
+        with self.assertRaises(InvalidArgumentError):
+            self.build_api_with_timeouts(token_timeout=0)
+
+    def build_api_with_timeouts(self, **timeouts: object) -> AmazonCreatorsApi:
+        """Build an API client with the given timeout arguments."""
+        return AmazonCreatorsApi(
+            credential_id=self.credential_id,
+            credential_secret=self.credential_secret,
+            version=self.version,
+            tag=self.tag,
+            country=self.country,
+            **timeouts,  # type: ignore[arg-type]
+        )
+
     @mock.patch("amazon_creatorsapi.api.DefaultApi")
     @mock.patch("amazon_creatorsapi.api.ApiClient")
     def test_get_items_without_items_raises_library_error(

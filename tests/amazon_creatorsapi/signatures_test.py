@@ -29,6 +29,7 @@ POSITIONAL_ARGUMENTS = {
         "retries",
         "host",
         "auth_endpoint",
+        "token_timeout",
     ],
     "get_items": [
         "items",
