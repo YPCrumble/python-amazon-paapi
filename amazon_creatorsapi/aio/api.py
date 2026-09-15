@@ -87,6 +87,7 @@ from creatorsapi_python_sdk.models.search_items_resource import SearchItemsResou
 if TYPE_CHECKING:
     from types import TracebackType
 
+    from amazon_creatorsapi.core.constants import TimeoutValue
     from amazon_creatorsapi.core.marketplaces import CountryCode
     from creatorsapi_python_sdk.models.availability import Availability
     from creatorsapi_python_sdk.models.condition import Condition
@@ -168,13 +169,18 @@ class AsyncAmazonCreatorsApi:
         country: Country code (e.g., "ES", "US"). Used to determine marketplace.
         marketplace: Marketplace URL (e.g., "www.amazon.es"). Overrides country.
         throttling: Wait time in seconds between API calls. Defaults to 1 second.
-        timeout: Request timeout in seconds, or None to wait indefinitely.
-            Defaults to 30 seconds.
+        timeout: Request timeout in seconds, a pair of ``(connect, read)``
+            seconds bounding each leg on its own, or None to wait
+            indefinitely. Defaults to 30 seconds.
         retries: Extra attempts for the failures that Amazon asks to retry,
             waiting longer before every attempt. Defaults to 3.
         host: Base URL of the API. Defaults to the Amazon Creators API.
         auth_endpoint: URL used to get the OAuth2 token. Defaults to the one
             of the version in use.
+        token_timeout: Timeout for the OAuth2 token request, in the same
+            shapes as timeout. The token is requested from a different host,
+            so it can be bounded apart from the API request. Follows timeout
+            when it is not given.
 
     Raises:
         InvalidArgumentError: If neither country nor marketplace is provided,
@@ -196,10 +202,11 @@ class AsyncAmazonCreatorsApi:
         country: CountryCode | None = None,
         marketplace: str | None = None,
         throttling: float = DEFAULT_THROTTLING,
-        timeout: float | None = DEFAULT_TIMEOUT,
+        timeout: TimeoutValue | None = DEFAULT_TIMEOUT,
         retries: int = DEFAULT_RETRIES,
         host: str = DEFAULT_HOST,
         auth_endpoint: str | None = None,
+        token_timeout: TimeoutValue | None = None,
     ) -> None:
         """Initialize the async Amazon Creators API client."""
         # Resolve the endpoint early to fail fast on an unsupported version,
@@ -214,6 +221,9 @@ class AsyncAmazonCreatorsApi:
         self.tag = tag
         self.throttling = validate_throttling(throttling)
         self.timeout = validate_timeout(timeout)
+        self.token_timeout = (
+            self.timeout if token_timeout is None else validate_timeout(token_timeout)
+        )
         self.retries = validate_retries(retries)
         self._last_query_time = time.monotonic() - self.throttling
 
@@ -227,7 +237,7 @@ class AsyncAmazonCreatorsApi:
             credential_secret=credential_secret,
             version=version,
             auth_endpoint=endpoint,
-            timeout=self.timeout,
+            timeout=self.token_timeout,
         )
         self._owns_client = False
 
